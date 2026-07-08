@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kisah Kita</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           1. CSS VARIABLES & BASE STYLES
+           ========================================= */
+        :root {
+            --bg-color-1: #0f0c29;
+            --bg-color-2: #302b63;
+            --bg-color-3: #24243e;
+            --text-primary: #f8f9fa;
+            --text-secondary: #cbd5e1;
+            --accent-gold: #fbbf24;
+            --accent-glow: rgba(251, 191, 36, 0.6);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            
+            --font-main: 'Poppins', sans-serif;
+            --font-title: 'Playfair Display', serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            font-family: var(--font-main);
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-3));
+            background-size: 200% 200%;
+            animation: gradientBG 15s ease infinite;
+            scroll-behavior: smooth;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Canvas Background */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* =========================================
+           2. UTILITIES & GLASSMORPHISM
+           ========================================= */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            width: 100%;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-family: var(--font-main);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
+            touch-action: manipulation; /* Optimasi sentuhan peranti */
+        }
+
+        .btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 15px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-gold {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 1s forwards; }
+        .fade-out { animation: fadeOut 1s forwards; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        /* =========================================
+           3. SCREEN LAYOUTS
+           ========================================= */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease-in-out;
+            padding: 1.5rem;
+        }
+
+        .screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Typography */
+        h1, h2, h3 { font-family: var(--font-title); font-weight: normal; margin-bottom: 1rem; }
+        h1 { font-size: clamp(2.2rem, 6vw, 4rem); text-align: center; color: var(--accent-gold); text-shadow: 0 0 20px var(--accent-glow); }
+        h2 { font-size: clamp(1.6rem, 5vw, 2.5rem); color: var(--accent-gold); text-align: center; }
+        p { line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center; max-width: 600px; font-size: clamp(0.9rem, 2.5vw, 1.1rem); }
+
+        /* UI Elements */
+        #music-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+        }
+
+        #music-toggle:hover { background: rgba(255, 255, 255, 0.2); }
+
+        #progress-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 90;
+            text-align: center;
+            background: var(--glass-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--glass-border);
+        }
+
+        .progress-dots {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+            justify-content: center;
+        }
+        
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 1px solid var(--accent-gold);
+            transition: all 0.3s ease;
+        }
+        .dot.active {
+            background: var(--accent-gold);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* =========================================
+           4. SPECIFIC CHAPTER STYLES
+           ========================================= */
+        
+        /* Loading Screen */
+        #loading-text { font-family: var(--font-title); font-size: clamp(1.2rem, 4vw, 1.8rem); letter-spacing: 2px; text-align: center; }
+
+        /* Main Menu */
+        .menu-buttons { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; width: 100%; max-width: 300px; }
+        #easter-egg-star { position: absolute; top: 10%; left: 15%; font-size: 20px; cursor: pointer; opacity: 0.1; transition: opacity 0.3s; }
+        #easter-egg-star:hover { opacity: 0.8; }
+
+        /* Memory Images placeholder style */
+        .memory-img {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            background: #2a2a4a; /* Fallback color */
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        /* Chapter 1: Stars Interaction */
+        .interactive-area { position: relative; width: 100%; max-width: 600px; height: 260px; margin: 1.5rem 0; background: rgba(0,0,0,0.2); border-radius: 12px; }
+        .hidden-star {
+            position: absolute;
+            font-size: 28px; /* Lebih besar untuk peranti sentuh */
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            user-select: none;
+            animation: pulse 2s infinite;
+            padding: 10px; /* Lebarkan kawasan sentuhan */
+            margin: -10px;
+        }
+        .hidden-star:hover, .hidden-star.found {
+            color: var(--accent-gold);
+            text-shadow: 0 0 15px var(--accent-glow);
+            transform: scale(1.2);
+        }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* Chapter 2: Polaroid & Puzzle */
+        .polaroid-container {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 280px;
+            height: 360px;
+            margin: 1.5rem auto;
+        }
+        .polaroid {
+            width: 100%;
+            height: 100%;
+            background: white;
+            padding: 12px 12px 35px 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        .polaroid.flipped { transform: rotateY(180deg); }
+        .polaroid-front, .polaroid-back {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            backface-visibility: hidden;
+            padding: 12px;
+            box-sizing: border-box;
+        }
+        .polaroid-back {
+            transform: rotateY(180deg);
+            background: #fdfbf7;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+        }
+        .polaroid-front img { width: 100%; height: 260px; object-fit: cover; background: #eee; }
+        
+        .puzzle-area { display: flex; gap: 15px; margin-top: 1.5rem; justify-content: center; }
+        .puzzle-piece {
+            width: 55px; height: 55px;
+            background: rgba(255,255,255,0.1);
+            border: 1px dashed var(--accent-gold);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; transition: all 0.3s;
+            touch-action: manipulation;
+        }
+        .puzzle-piece.collected { background: var(--accent-gold); border: 1px solid transparent; cursor: default; }
+
+        /* Chapter 3: Timeline */
+        .timeline { position: relative; width: 100%; max-width: 450px; margin: 1.5rem auto; padding: 15px 0; }
+        .timeline::after {
+            content: ''; position: absolute; width: 2px; background: var(--glass-border);
+            top: 0; bottom: 0; left: 50%; margin-left: -1px;
+        }
+        .timeline-item {
+            padding: 10px 15px; position: relative; width: 50%; cursor: pointer;
+            transition: transform 0.3s;
+            touch-action: manipulation;
+        }
+        .timeline-item:hover { transform: scale(1.05); }
+        .timeline-item:nth-child(odd) { left: 0; text-align: right; }
+        .timeline-item:nth-child(even) { left: 50%; text-align: left; }
+        .timeline-item::after {
+            content: ''; position: absolute; width: 14px; height: 14px;
+            background: var(--bg-color-2); border: 2px solid var(--accent-gold);
+            border-radius: 50%; top: 15px; right: -7px; z-index: 1;
+        }
+        .timeline-item:nth-child(even)::after { left: -7px; }
+        .timeline-item.viewed::after { background: var(--accent-gold); box-shadow: 0 0 10px var(--accent-glow); }
+        .timeline-date { font-size: 0.8rem; color: var(--accent-gold); margin-bottom: 5px; }
+        .timeline-title { font-weight: 600; font-size: 0.95rem; line-height: 1.3; }
+
+        /* Chapter 4: Door (Previously Bab 5) */
+        .story-text { opacity: 0; transition: opacity 2s ease-in-out; margin-bottom: 2rem; font-size: clamp(1rem, 3vw, 1.25rem); }
+        .story-text.visible { opacity: 1; }
+        .glowing-door {
+            width: 80px; height: 120px;
+            border: 2px solid var(--accent-gold);
+            border-radius: 40px 40px 0 0;
+            margin: 2rem auto;
+            position: relative;
+            cursor: pointer;
+            box-shadow: inset 0 0 20px rgba(251, 191, 36, 0.2), 0 0 20px rgba(251, 191, 36, 0.2);
+            transition: all 0.5s ease;
+            background: linear-gradient(to top, rgba(255,255,255,0.1), transparent);
+        }
+        .glowing-door:hover { box-shadow: inset 0 0 40px var(--accent-glow), 0 0 40px var(--accent-glow); }
+
+        /* Final Message: Envelope */
+        .envelope-wrapper { width: 100%; max-width: 280px; height: 180px; position: relative; margin: 2rem auto; cursor: pointer; perspective: 1000px; }
+        .envelope {
+            position: absolute; width: 100%; height: 100%;
+            background: #fdfbf7; border-radius: 5px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        .envelope-flap {
+            position: absolute; top: 0; left: 0; width: 100%; height: 50%;
+            background: #e9e5db;
+            clip-path: polygon(0 0, 50% 100%, 100% 0);
+            transform-origin: top;
+            transition: transform 1s;
+            z-index: 3;
+        }
+        .envelope-wrapper.open .envelope-flap { transform: rotateX(180deg); z-index: 1; }
+        .letter {
+            position: absolute; bottom: 0; left: 5%; width: 90%; height: 90%;
+            background: white; border-radius: 5px;
+            padding: 15px; box-sizing: border-box;
+            transition: transform 1s 0.5s;
+            z-index: 2;
+            color: #333;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .envelope-wrapper.open .letter { transform: translateY(-80px); height: 320px; z-index: 4; }
+        
+        .letter p { color: #444; text-align: left; font-size: 0.9rem; margin-bottom: 1rem; }
+        .letter h3 { color: #222; text-align: center; font-size: 1rem; border-bottom: 1px solid #ccc; padding-bottom: 8px;}
+
+        /* Custom Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content {
+            background: var(--bg-color-2); border: 1px solid var(--accent-gold);
+            border-radius: 12px; padding: 1.5rem; max-width: 90%; width: 420px;
+            text-align: center; transform: scale(0.9); transition: transform 0.3s;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-img { width: 100%; height: auto; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem; background: #1a1a3a;}
+        
+        /* Interactive video container for Google Drive Iframe */
+        .modal-video-container {
+            width: 100%;
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            background: #000;
+        }
+        .modal-video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* =========================================
+           5. MOBILE OPTIMIZATIONS (RESPONSIVE)
+           ========================================= */
+        @media (max-width: 480px) {
+            .screen {
+                padding: 1rem;
+            }
+            .glass-panel {
+                padding: 1.2rem;
+            }
+            /* Stack timeline vertically on small screens */
+            .timeline::after {
+                left: 20px;
+            }
+            .timeline-item {
+                width: 100% !important;
+                left: 0 !important;
+                padding-left: 35px;
+                padding-right: 0;
+                text-align: left !important;
+            }
+            .timeline-item::after {
+                left: 13px !important;
+                right: auto !important;
+            }
+            /* Adjust envelope transition on small screens */
+            .envelope-wrapper.open .letter { 
+                transform: translateY(-60px); 
+                height: 280px; 
+            }
+        }
+
+        /* Reduce motion */
+        @media (prefers-reduced-motion: reduce) {
+            * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+            #starfield { display: none; }
+            body { background: var(--bg-color-1); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Canvas for Starfield -->
+    <canvas id="starfield"></canvas>
+
+    <!-- Audio Element -->
+    <audio id="bg-music" loop>
+        <source src="assets/music/background.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Music Toggle Button -->
+    <button id="music-toggle" aria-label="Buka/Tutup Muzik">🔇</button>
+
+    <!-- Progress Indicator -->
+    <div id="progress-container" class="hidden">
+        <div style="font-size: 0.8rem; letter-spacing: 1px;">BAB <span id="current-bab">1</span> / 4</div>
+        <div class="progress-dots" id="progress-dots">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+    </div>
+
+    <!-- ================= SCREENS ================= -->
+
+    <!-- LOADING SCREEN -->
+    <section id="screen-loading" class="screen active">
+        <h2 id="loading-text" class="fade-in">Memuatkan sebuah perjalanan...</h2>
+    </section>
+
+    <!-- MAIN MENU -->
+    <section id="screen-menu" class="screen">
+        <!-- Easter Egg Star -->
+        <div id="easter-egg-star">⭐</div>
+        
+        <div class="glass-panel" style="text-align: center; max-width: 600px;">
+            <h1>KISAH KITA</h1>
+            <p style="font-style: italic;">
+                "Assalamualaikum, apa khabar tuan puteri kayangan"
+            </p>
+            
+            <div class="menu-buttons">
+                <button id="btn-start" class="btn btn-gold">MULAKAN PERJALANAN</button>
+                <button id="btn-continue" class="btn hidden">TERUSKAN PERJALANAN</button>
+                <button id="btn-about" class="btn">TENTANG PERJALANAN INI</button>
+                <button id="btn-reset" class="btn hidden" style="border-color: #ef4444; color: #ef4444;">MULAKAN SEMULA (PADAM DATA)</button>
+            </div>
+            
+            <p style="font-size: 0.8rem; margin-top: 2rem; opacity: 0.7;">
+                🎧 Gunakan headphone untuk pengalaman terbaik.
+            </p>
+        </div>
+    </section>
+
+    <!-- CHAPTER 1: PERTEMUAN -->
+    <section id="screen-ch1" class="screen">
+        <div class="glass-panel" style="max-width: 800px; width: 100%;">
+            <h2>Bab 1: Di Sini Semuanya Bermula</h2>
+            
+            <img src="assets/images/1123123123.jpeg" alt="Gambar Pertemuan Pertama" class="memory-img" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYTJhNGEiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiM2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5HYW1iYXIgS2VuYW5nYW4gMTwvdGV4dD48L3N2Zz4='">
+            
+            <div style="text-align: left; margin-bottom: 2rem;">
+                <p style="color: var(--accent-gold); font-size: 0.9rem; margin: 0;">📅 Tarikh: Semester 3</p>
+                <p style="color: var(--accent-gold); font-size: 0.9rem; margin: 0 0 1rem 0;">📍 Lokasi: Bengkel Welding FTV</p>
+            </div>
+
+            <p style="font-size: 0.85rem; font-style: italic; text-align: center;">(Cari dan tekan 3 bintang bercahaya yang tersembunyi di sekitar kawasan ini)</p>
+            
+            <div class="interactive-area" id="ch1-area">
+                <!-- Stars added via JS -->
+            </div>
+
+            <div style="text-align: center; margin-top: 1rem;">
+                <button id="btn-next-ch1" class="btn btn-gold hidden">TERUSKAN PERJALANAN</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CHAPTER 2: KENANGAN PERTAMA -->
+    <section id="screen-ch2" class="screen">
+        <h2>Bab 2: Kenangan Yang Masih Aku Ingat</h2>
+        <p>"Ada hari yang kelihatan biasa pada waktu itu... tetapi menjadi istimewa apabila dikenang kembali."</p>
+        
+        <p style="font-size: 0.85rem; font-style: italic;">(Tekan gambar untuk melihat cerita, dan kumpul 3 kepingan memori)</p>
+
+        <div class="polaroid-container" onclick="this.querySelector('.polaroid').classList.toggle('flipped')">
+            <div class="polaroid">
+                <div class="polaroid-front">
+                    <img src="assets/images/111.jpeg" alt="Kenangan Polaroid" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYTJhNGEiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiM2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5HYW1iYXIgUG9sYXJvaWQ8L3RleHQ+PC9zdmc+'">
+                    <p style="color: #333; margin-top: 15px; font-family: var(--font-main); font-weight: 500;">Perjalanan Pertama Kita</p>
+                </div>
+                <div class="polaroid-back">
+                    <p>"Kita ketawa sepanjang jalan, bercerita tentang perkara merapu. Aku simpan memori ini rapat dalam ingatan."</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="puzzle-area" id="ch2-puzzle">
+            <div class="puzzle-piece" onclick="collectPiece(this, 1)">🧩</div>
+            <div class="puzzle-piece" onclick="collectPiece(this, 2)">🧩</div>
+            <div class="puzzle-piece" onclick="collectPiece(this, 3)">🧩</div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <button id="btn-next-ch2" class="btn btn-gold hidden">TERUSKAN PERJALANAN</button>
+        </div>
+    </section>
+
+    <!-- CHAPTER 3: GALERI MASA -->
+    <section id="screen-ch3" class="screen">
+        <h2>Bab 3: Waktu Yang Pernah Kita Kongsi</h2>
+        <p>Lihat kembali garis masa memori. Buka kesemua 3 kenangan.</p>
+        <p id="ch3-counter" style="color: var(--accent-gold); font-weight: bold;">Kenangan ditemui: 0 / 3</p>
+
+        <div class="timeline">
+            <div class="timeline-item" onclick="openMemoryModal(0, this)">
+                <div class="timeline-date">Sem 6</div>
+                <div class="timeline-title">1st time makan Lasagna</div>
+            </div>
+            <div class="timeline-item" onclick="openMemoryModal(1, this)">
+                <div class="timeline-date">Sem 5</div>
+                <div class="timeline-title">AJK makanan Program</div>
+            </div>
+            <div class="timeline-item" onclick="openMemoryModal(2, this)">
+                <div class="timeline-date">Sem 3</div>
+                <div class="timeline-title">Last grup projek video bersama</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <button id="btn-next-ch3" class="btn btn-gold hidden">TERUSKAN PERJALANAN</button>
+        </div>
+    </section>
+
+    <!-- CHAPTER 4: JALAN TERAKHIR (Dulu Bab 5) -->
+    <section id="screen-ch4" class="screen">
+        <div class="glass-panel" style="max-width: 600px; width: 100%; text-align: center;">
+            <div id="story-sequence">
+                <p class="story-text" id="s1">Kita telah sampai ke penghujung perjalanan.</p>
+                <p class="story-text" id="s2">Terima kasih kerana masih sudi melihat kembali cerita ini.</p>
+                <p class="story-text" id="s3">Ada satu perkara terakhir yang ingin aku sampaikan.</p>
+            </div>
+
+            <div class="glowing-door hidden" id="final-door" onclick="showFinalMessage()" aria-label="Buka Pesanan Terakhir"></div>
+            <p id="door-hint" class="hidden" style="font-size: 0.8rem; margin-top: 10px;">(Tekan Pintu Bercahaya)</p>
+        </div>
+    </section>
+
+    <!-- FINAL MESSAGE -->
+    <section id="screen-final-msg" class="screen">
+        <h2>Untuk Seseorang Yang Pernah Menjadi Bahagian Daripada Cerita Ini</h2>
+        <p style="font-size: 0.85rem; font-style: italic;">(Tekan sampul surat untuk membuka)</p>
+
+        <div class="envelope-wrapper" id="envelope" onclick="openEnvelope()">
+            <div class="envelope"></div>
+            <div class="envelope-flap"></div>
+            <div class="letter">
+                <h3>Pesanan Terakhir</h3>
+                <p>Sejujurnya aku tak tahu nak cakap macam mana, sebab aku bukanlah orang yang pandai cakap banyak, tapi ni mungkin effort terakhir bagi aku untuk kau.</p>
+                <p>Aku tak tahu bagaimana masa akan membawa kita lepas ni, mungkin kita akan jumpa lagi, mungkin boleh jadi ini kali terakhir kita jumpa.</p>
+                <p>Tetapi wafi nak mirah tahu yang pernah ada sorang laki macam wafi yang SAYANG sangat kat mirah cumanya tak reti nk bagitahu betul ii. Wafi dah cuba untuk try bagitahu mirah cuma takut nti kau jadi tak selesa dengan aku. Dah lama dah pendam rasa ni.</p>
+                <p>kalau ingt dulu time mirah demam tahun lepas wafi ada bagi hadiah buah oren semua tu, memang bukan tiba ii, tapi memang sebab suka mirah la. cuma time tu risau nampak pelik plak tetiba confess hehek. pikir balik rasa nyesal pulak.</p>
+                <p>Mungkin disitulah kekurangan yang ada pada wafi, dan wafi mintak maaf kalau ada ganggu mirah sebelum ni, sesungguhnya tiada niat lain selain dari hati yang tulus ikhlas menyayangi mu.</p>
+                <p>Wafi tak bina platform ini untuk minta apa ii. Cuma nok royak (bagitahu) terima kasih atas segalanya dan menjadi sebahagian yang indah dekat UPSI ni.</p>
+                <p>Walaupon wafi sendiri pon tak pasti apa perasaan mirah kepada wafi, cuma apa pon tuan puteri rasa terhadap patik, patik relakan semuanya. 😊</p>
+                <p>Wafi harap apa sahaja jalan yang tuan puteri pilih selepas ini membawa kepada perkara-perkara yang baik, dijauhi orang yang nak sakitkan hati, dan sentiasa berjaya dan tabah menghadapi segala rintangan kehidupan.</p>
+                <p>Andai ini adalah kali terakhir kita jumpa.</p>
+                <p>Jaga Diri, Jaga Hati, Jaga Maruah.</p>
+                <p>Ada rezeki kita jumpa lagi, tapi andai salah sorang antara kita dijemput ilahi. i just wanna say</p>
+                <p>I LOVE YOU SOOOOOOOO MUCH</p>
+                <p>Bye. Assalamualaikum.</p>
+                <p>Muhammad Nor Wafi Bin Ghazali</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 4rem;">
+            <button id="btn-secret-ending" class="btn btn-gold hidden">LIHAT SATU KENANGAN TERAKHIR</button>
+        </div>
+    </section>
+
+    <!-- SECRET ENDING -->
+    <section id="screen-secret" class="screen">
+        <img src="assets/images/final-memory.jpg" alt="Kenangan Terakhir" class="memory-img" style="max-width: 500px; height: 300px; border-radius: 12px;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyYTJhNGEiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiM2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5HYW1iYXIgVGVyYWtoaXI8L3RleHQ+PC9zdmc+'">
+        
+        <h2 style="font-family: var(--font-title); font-style: italic; margin: 2rem 0;">
+            "Some people become memories.<br>And some memories become part of who we are."
+        </h2>
+        
+        <p style="font-size: 1.2rem; color: var(--accent-gold); margin-bottom: 3rem;">Terima kasih dan Semoga baik-baik saja Tuan Puteri Kayangan ❤️</p>
+        
+        <button onclick="resetAndGoHome()" class="btn">KEMBALI KE MENU UTAMA</button>
+    </section>
+
+
+    <!-- ================= CUSTOM MODALS ================= -->
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-title" style="color: var(--accent-gold); margin-bottom: 1rem;">Tajuk</h3>
+            
+            <!-- Standard Image Holder -->
+            <img id="modal-img" src="" class="modal-img hidden" alt="Modal Image">
+            
+            <!-- Google Drive / YouTube Video Player Iframe Holder -->
+            <div id="modal-video-holder" class="modal-video-container hidden">
+                <iframe id="modal-video" src="" allow="autoplay" allowfullscreen></iframe>
+            </div>
+
+            <p id="modal-desc">Deskripsi</p>
+            <button class="btn" style="margin-top: 10px;" onclick="closeModal()">Tutup</button>
+        </div>
+    </div>
+
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        // --- State Management ---
+        let currentChapter = 0; // 0 = menu
+        let hasMusicPlayed = false;
+        const bgMusic = document.getElementById('bg-music');
+        const STORAGE_KEY = 'perjalanan_kenangan_progress';
+
+        // --- Data Chapters ---
+        const timelineData = [
+            { 
+                title: "1st time makan Lasagna", 
+                date: "Sem 6", 
+                desc: "Makan lasagna sedap yang ada tulis nama Nor Wafi ni sama-sama. Antara kenangan ringkas yang paling manis dan bermakna bagi aku.", 
+                img: "12222222.jpg" 
+            },
+            { 
+                title: "AJK makanan Program", 
+                date: "Sem 5", 
+                desc: "Sama-sama bertugas sebagai AJK Makanan Program. Penat tapi seronok dapat berkerjasama.", 
+                img: "12111111.jpeg" 
+            },
+            { 
+                title: "Last grup projek video bersama", 
+                date: "Sem 3", 
+                desc: "", 
+                videoUrl: "letak link google drive disini" 
+            }
+        ];
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvasStars();
+            
+            // Loading Sequence
+            setTimeout(() => {
+                const loadingText = document.getElementById('loading-text');
+                loadingText.classList.remove('fade-in');
+                loadingText.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    loadingText.innerText = "Menyusun kembali serpihan kenangan...";
+                    loadingText.classList.remove('fade-out');
+                    loadingText.classList.add('fade-in');
+                    
+                    setTimeout(() => {
+                        checkProgress();
+                        switchScreen('screen-loading', 'screen-menu');
+                    }, 2500);
+                }, 1000);
+            }, 2500);
+            
+            setupEventListeners();
+        });
+
+        // --- Event Listeners ---
+        function setupEventListeners() {
+            // Audio toggle
+            document.getElementById('music-toggle').addEventListener('click', toggleMusic);
+            
+            // Menu buttons
+            document.getElementById('btn-start').addEventListener('click', () => {
+                if(!hasMusicPlayed) toggleMusic();
+                startJourney();
+            });
+            document.getElementById('btn-continue').addEventListener('click', () => {
+                if(!hasMusicPlayed) toggleMusic();
+                continueJourney();
+            });
+            document.getElementById('btn-reset').addEventListener('click', confirmReset);
+            document.getElementById('btn-about').addEventListener('click', () => {
+                showModal("Tentang Perjalanan Ini", "Ini adalah sedikit sebanyak memori yang telah terukir antara kita.");
+            });
+
+            // Next Chapter buttons
+            document.getElementById('btn-next-ch1').addEventListener('click', () => nextChapter(2));
+            document.getElementById('btn-next-ch2').addEventListener('click', () => nextChapter(3));
+            document.getElementById('btn-next-ch3').addEventListener('click', () => nextChapter(4));
+            document.getElementById('btn-secret-ending').addEventListener('click', () => switchScreen('screen-final-msg', 'screen-secret'));
+
+            // Easter Egg
+            let clickCount = 0;
+            document.getElementById('easter-egg-star').addEventListener('click', () => {
+                clickCount++;
+                if (clickCount >= 5) {
+                    showModal("Rahsia Ditemui", "Kalau kau jumpa mesej ini... maknanya kau masih suka mencari perkara kecil yang tersembunyi. Aku masih ingat perkara itu. ✨");
+                    clickCount = 0; // reset
+                }
+            });
+        }
+
+        // --- Core Functions ---
+        function switchScreen(oldId, newId) {
+            document.getElementById(oldId).classList.remove('active');
+            setTimeout(() => {
+                document.getElementById(newId).classList.add('active');
+                if (newId !== 'screen-menu' && newId !== 'screen-loading' && newId !== 'screen-secret' && newId !== 'screen-final-msg') {
+                    document.getElementById('progress-container').classList.remove('hidden');
+                } else {
+                    document.getElementById('progress-container').classList.add('hidden');
+                }
+            }, 1000); // Wait for fade out
+        }
+
+        function updateProgressUI(chapter) {
+            document.getElementById('current-bab').innerText = chapter;
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                if (index < chapter) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function saveProgress(chapter) {
+            localStorage.setItem(STORAGE_KEY, chapter);
+        }
+
+        function checkProgress() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved && parseInt(saved) > 1) {
+                document.getElementById('btn-continue').classList.remove('hidden');
+                document.getElementById('btn-reset').classList.remove('hidden');
+                document.getElementById('btn-start').innerText = "MULAKAN DARI AWAL";
+            }
+        }
+
+        function startJourney() {
+            localStorage.removeItem(STORAGE_KEY);
+            currentChapter = 1;
+            updateProgressUI(1);
+            setupChapter1();
+            switchScreen('screen-menu', 'screen-ch1');
+        }
+
+        function continueJourney() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                currentChapter = parseInt(saved);
+                updateProgressUI(currentChapter);
+                // Reset states for the chapter we are entering
+                if(currentChapter === 1) setupChapter1();
+                if(currentChapter === 2) setupChapter2();
+                if(currentChapter === 3) setupChapter3();
+                if(currentChapter === 4) setupChapter4();
+                
+                switchScreen('screen-menu', `screen-ch${currentChapter}`);
+            }
+        }
+
+        function confirmReset() {
+            showModal("Pengesahan", "Adakah anda pasti untuk memadam semua progress memori?", true, () => {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            });
+        }
+
+        function nextChapter(nextNum) {
+            saveProgress(nextNum);
+            currentChapter = nextNum;
+            updateProgressUI(nextNum);
+            
+            if(nextNum === 2) setupChapter2();
+            if(nextNum === 3) setupChapter3();
+            if(nextNum === 4) setupChapter4();
+
+            switchScreen(`screen-ch${nextNum-1}`, `screen-ch${nextNum}`);
+        }
+
+        // --- Audio Handling ---
+        function toggleMusic() {
+            const toggleBtn = document.getElementById('music-toggle');
+            if (bgMusic.paused) {
+                bgMusic.play().then(() => {
+                    hasMusicPlayed = true;
+                    toggleBtn.innerText = "🔊";
+                }).catch(e => console.log("Audio autoplay dihalang oleh browser.", e));
+            } else {
+                bgMusic.pause();
+                toggleBtn.innerText = "🔇";
+            }
+        }
+
+        // --- Modal System ---
+        function showModal(title, desc, isConfirm = false, onConfirm = null, imgPath = null, videoUrl = null) {
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = title;
+            
+            const descEl = document.getElementById('modal-desc');
+            if (desc && desc.trim() !== "") {
+                descEl.innerHTML = desc;
+                descEl.classList.remove('hidden');
+            } else {
+                descEl.classList.add('hidden');
+            }
+            
+            const imgEl = document.getElementById('modal-img');
+            const videoHolder = document.getElementById('modal-video-holder');
+            const iframeEl = document.getElementById('modal-video');
+
+            // Reset media views
+            imgEl.classList.add('hidden');
+            videoHolder.classList.add('hidden');
+            iframeEl.src = "";
+
+            if (videoUrl) {
+                // Set the iframe URL directly (e.g. Google Drive embedded video preview link)
+                iframeEl.src = videoUrl;
+                videoHolder.classList.remove('hidden');
+            } else if (imgPath) {
+                imgEl.src = imgPath;
+                imgEl.onerror = function() {
+                    this.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMxYTFhM2EiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5HYW1iYXI8L3RleHQ+PC9zdmc+";
+                };
+                imgEl.classList.remove('hidden');
+            }
+
+            const existingBtn = modal.querySelector('.btn-confirm');
+            if (existingBtn) existingBtn.remove();
+
+            if (isConfirm) {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-gold btn-confirm';
+                btn.innerText = "Pasti";
+                btn.style.marginLeft = "10px";
+                btn.onclick = () => { closeModal(); if(onConfirm) onConfirm(); };
+                modal.querySelector('.modal-content').appendChild(btn);
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.remove('active');
+            // Reset iframe player on close to stop playback immediately
+            document.getElementById('modal-video').src = "";
+        }
+
+        // --- Chapter Logic ---
+
+        // Chapter 1
+        function setupChapter1() {
+            const area = document.getElementById('ch1-area');
+            area.innerHTML = ''; // reset
+            document.getElementById('btn-next-ch1').classList.add('hidden');
+            let starsFound = 0;
+
+            for (let i = 0; i < 3; i++) {
+                const star = document.createElement('div');
+                star.className = 'hidden-star';
+                star.innerText = '✦';
+                star.style.top = `${Math.random() * 70 + 15}%`;
+                star.style.left = `${Math.random() * 70 + 15}%`;
+                
+                star.onclick = function() {
+                    if (!this.classList.contains('found')) {
+                        this.classList.add('found');
+                        this.style.animation = 'none'; // stop pulsing
+                        starsFound++;
+                        if (starsFound === 3) {
+                            showModal("Tahniah", "Ketiga-tiga serpihan bintang kenangan pertama telah ditemui.");
+                            document.getElementById('btn-next-ch1').classList.remove('hidden');
+                        }
+                    }
+                };
+                area.appendChild(star);
+            }
+        }
+
+        // Chapter 2
+        let piecesCollected = 0;
+        function setupChapter2() {
+            piecesCollected = 0;
+            const pieces = document.querySelectorAll('.puzzle-piece');
+            pieces.forEach(p => {
+                p.classList.remove('collected');
+                p.style.opacity = '1';
+            });
+            document.getElementById('btn-next-ch2').classList.add('hidden');
+            document.querySelector('.polaroid').classList.remove('flipped');
+        }
+        function collectPiece(element, id) {
+            if (!element.classList.contains('collected')) {
+                element.classList.add('collected');
+                piecesCollected++;
+                if (piecesCollected === 3) {
+                    showModal("Kenangan #2 Ditemui", "Gambar memori telah lengkap. Tekan gambar polaroid untuk membalikkannya.");
+                    document.getElementById('btn-next-ch2').classList.remove('hidden');
+                }
+            }
+        }
+
+        // Chapter 3
+        let timelineViewed = 0;
+        function setupChapter3() {
+            timelineViewed = 0;
+            document.getElementById('ch3-counter').innerText = `Kenangan ditemui: 0 / ${timelineData.length}`;
+            document.getElementById('btn-next-ch3').classList.add('hidden');
+            const items = document.querySelectorAll('.timeline-item');
+            items.forEach(item => item.classList.remove('viewed'));
+        }
+        
+        function openMemoryModal(index, element) {
+            const data = timelineData[index];
+            showModal(data.title, data.desc, false, null, data.img || null, data.videoUrl || null);
+            
+            if (!element.classList.contains('viewed')) {
+                element.classList.add('viewed');
+                timelineViewed++;
+                document.getElementById('ch3-counter').innerText = `Kenangan ditemui: ${timelineViewed} / ${timelineData.length}`;
+                
+                if (timelineViewed === timelineData.length) {
+                    setTimeout(() => {
+                        showModal("Lengkap", "Semua kenangan di garis masa ini telah diimbas kembali.");
+                        document.getElementById('btn-next-ch3').classList.remove('hidden');
+                    }, 500); // give time for previous modal to close visually if user clicks fast
+                }
+            }
+        }
+
+        // Chapter 4 (Dulu Bab 5)
+        function setupChapter4() {
+            const texts = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
+            texts.forEach(t => t.classList.remove('visible'));
+            document.getElementById('final-door').classList.add('hidden');
+            document.getElementById('door-hint').classList.add('hidden');
+
+            let delay = 1000;
+            texts.forEach((text, i) => {
+                setTimeout(() => {
+                    text.classList.add('visible');
+                }, delay);
+                delay += 3000; // 3 seconds between texts
+            });
+
+            setTimeout(() => {
+                document.getElementById('final-door').classList.remove('hidden');
+                document.getElementById('door-hint').classList.remove('hidden');
+            }, delay + 1000);
+        }
+
+        function showFinalMessage() {
+            switchScreen('screen-ch4', 'screen-final-msg');
+            // Reset envelope
+            document.getElementById('envelope').classList.remove('open');
+            document.getElementById('btn-secret-ending').classList.add('hidden');
+        }
+
+        function openEnvelope() {
+            const env = document.getElementById('envelope');
+            if(!env.classList.contains('open')){
+                env.classList.add('open');
+                setTimeout(() => {
+                    document.getElementById('btn-secret-ending').classList.remove('hidden');
+                    document.getElementById('btn-secret-ending').classList.add('fade-in');
+                }, 1500); // Wait for letter to pop up
+            }
+        }
+
+        // --- Canvas Background (Starfield) ---
+        function initCanvasStars() {
+            const canvas = document.getElementById('starfield');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let stars = [];
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+
+            class Star {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.size = Math.random() * 1.5;
+                    this.baseAlpha = Math.random() * 0.5 + 0.1;
+                    this.alpha = this.baseAlpha;
+                    this.speed = (Math.random() * 0.05) + 0.01;
+                    this.pulseSpeed = (Math.random() * 0.02) + 0.01;
+                }
+
+                update() {
+                    this.y -= this.speed;
+                    if (this.y < 0) {
+                        this.y = height;
+                        this.x = Math.random() * width;
+                    }
+                    // Twinkle effect
+                    this.alpha = this.baseAlpha + Math.sin(Date.now() * this.pulseSpeed) * 0.2;
+                }
+
+                draw() {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            for (let i = 0; i < 150; i++) {
+                stars.push(new Star());
+            }
+
+            function animate() {
+                // Check if user prefers reduced motion
+                const reduceMotion = window.matchMedia(`(prefers-reduced-motion: reduce)`).matches;
+                if(reduceMotion) return; // Stop animation loop
+
+                ctx.clearRect(0, 0, width, height);
+                stars.forEach(star => {
+                    star.update();
+                    star.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+    </script>
+</body>
+</html>
