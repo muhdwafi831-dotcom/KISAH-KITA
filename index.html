@@ -393,7 +393,7 @@
         .modal-overlay.active .modal-content { transform: scale(1); }
         .modal-img { width: 100%; height: auto; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem; background: #1a1a3a;}
         
-        /* Interactive video container for Google Drive Iframe */
+        /* Interactive video container for local video */
         .modal-video-container {
             width: 100%;
             position: relative;
@@ -406,13 +406,14 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             background: #000;
         }
-        .modal-video-container iframe {
+        .modal-video-container video {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             border: 0;
+            background: #000;
         }
 
         /* =========================================
@@ -659,9 +660,9 @@
             <!-- Standard Image Holder -->
             <img id="modal-img" src="" class="modal-img hidden" alt="Modal Image">
             
-            <!-- Google Drive / YouTube Video Player Iframe Holder -->
+            <!-- Local Video Player Holder -->
             <div id="modal-video-holder" class="modal-video-container hidden">
-                <iframe id="modal-video" src="" allow="autoplay" allowfullscreen></iframe>
+                <video id="modal-video" controls playsinline></video>
             </div>
 
             <p id="modal-desc">Deskripsi</p>
@@ -696,7 +697,7 @@
                 title: "Last grup projek video bersama", 
                 date: "Sem 3", 
                 desc: "Tak ingt sem berapa sebenarnya, cuma ingat time ni memang lucu hahahah", 
-                videoUrl: "https://drive.google.com/file/d/1BFOvZbPByM8oCC0vfI0FkY-Yu-MgA087/view?usp=sharing" 
+                videoUrl: "IMG_1626.MOV" 
             }
         ];
 
@@ -889,16 +890,17 @@
             
             const imgEl = document.getElementById('modal-img');
             const videoHolder = document.getElementById('modal-video-holder');
-            const iframeEl = document.getElementById('modal-video');
+            const videoEl = document.getElementById('modal-video');
 
             // Reset media views
             imgEl.classList.add('hidden');
             videoHolder.classList.add('hidden');
-            iframeEl.src = "";
+            videoEl.pause();
+            videoEl.src = "";
 
             if (videoUrl) {
-                // Set the iframe URL directly (e.g. Google Drive embedded video preview link)
-                iframeEl.src = videoUrl;
+                // Set the local video URL
+                videoEl.src = videoUrl;
                 videoHolder.classList.remove('hidden');
             } else if (imgPath) {
                 imgEl.src = imgPath;
@@ -925,8 +927,10 @@
 
         function closeModal() {
             document.getElementById('custom-modal').classList.remove('active');
-            // Reset iframe player on close to stop playback immediately
-            document.getElementById('modal-video').src = "";
+            // Stop video playback and reset src
+            const videoEl = document.getElementById('modal-video');
+            videoEl.pause();
+            videoEl.src = "";
         }
 
         // --- Chapter Logic ---
