@@ -682,7 +682,7 @@
             { 
                 title: "1st time makan Lasagna", 
                 date: "Sem 6", 
-                desc: "Makan lasagna sedap yang ada tulis nama Nor Wafi ni sama-sama. Antara kenangan ringkas yang paling manis dan bermakna bagi aku.", 
+                desc: " Yeayyy dapat merasa lasagna yang mirah masak. sedap sangat walaupon ni festime wafi make lasagna. BESTTTT", 
                 img: "12222222.jpg" 
             },
             { 
@@ -838,6 +838,25 @@
             if(nextNum === 4) setupChapter4();
 
             switchScreen(`screen-ch${nextNum-1}`, `screen-ch${nextNum}`);
+        }
+
+        // --- Reset and Go Home ---
+        function resetAndGoHome() {
+            localStorage.removeItem(STORAGE_KEY);
+            
+            // Set state kembali ke menu utama
+            currentChapter = 0;
+            
+            // Sembunyikan progress container
+            document.getElementById('progress-container').classList.add('hidden');
+            
+            // Kembalikan butang menu utama ke keadaan asal
+            document.getElementById('btn-continue').classList.add('hidden');
+            document.getElementById('btn-reset').classList.add('hidden');
+            document.getElementById('btn-start').innerText = "MULAKAN PERJALANAN";
+            
+            // Tukar skrin secara halus ke menu utama tanpa melenyapkan lagu latar belakang
+            switchScreen('screen-secret', 'screen-menu');
         }
 
         // --- Audio Handling ---
